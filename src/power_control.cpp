@@ -946,17 +946,16 @@ static void resetButtonPressLog()
 
 static void nmiButtonPressLog()
 {
-    std::string severity =
-        "xyz.openbmc_project.Logging.Entry.Level.Informational";
+    std::string severity = "xyz.openbmc_project.Logging.Entry.Level.Critical";
     auto bus = sdbusplus::bus::new_default_system();
     sdbusplus::message::message m = bus.new_method_call(
         "xyz.openbmc_project.Logging", "/xyz/openbmc_project/logging",
         "xyz.openbmc_project.Logging.Create", "Create");
-    std::string journalMsg = "OpenBMC.0.1.PowerButtonPressed";
+    std::string journalMsg = "OpenBMC.0.1.NMIButtonPressed";
 
     std::map<std::string, std::string> additionalData;
-    additionalData["REDFISH_MESSAGE_ID"] = "OpenBMC.0.1.PowerButtonPressed";
-    additionalData["Additional_Data"] = "PowerControl: power button pressed";
+    additionalData["REDFISH_MESSAGE_ID"] = "OpenBMC.0.1.NMIButtonPressed";
+    additionalData["Additional_Data"] = "PowerControl: NMI button pressed";
     m.append(journalMsg, severity, additionalData);
     try
     {
@@ -964,23 +963,23 @@ static void nmiButtonPressLog()
     }
     catch (const sdbusplus::exception_t& e)
     {
-        lg2::info("Failed to create log entry: {ERROR}", "ERROR", e.what());
+        lg2::error("Failed to create log entry: {ERROR}", "ERROR", e.what());
     }
 }
 
 static void nmiDiagIntLog()
 {
-    std::string severity =
-        "xyz.openbmc_project.Logging.Entry.Level.Informational";
+    std::string severity = "xyz.openbmc_project.Logging.Entry.Level.Critical";
     auto bus = sdbusplus::bus::new_default_system();
     sdbusplus::message::message m = bus.new_method_call(
         "xyz.openbmc_project.Logging", "/xyz/openbmc_project/logging",
         "xyz.openbmc_project.Logging.Create", "Create");
-    std::string journalMsg = "OpenBMC.0.1.PowerButtonPressed";
+    std::string journalMsg = "OpenBMC.0.1.NMIDiagnosticInterrupt";
 
     std::map<std::string, std::string> additionalData;
-    additionalData["REDFISH_MESSAGE_ID"] = "OpenBMC.0.1.PowerButtonPressed";
-    additionalData["Additional_Data"] = "PowerControl: power button pressed";
+    additionalData["REDFISH_MESSAGE_ID"] = "OpenBMC.0.1.NMIDiagnosticInterrupt";
+    additionalData["Additional_Data"] =
+        "PowerControl: NMI Diagnostic Interrupt";
     m.append(journalMsg, severity, additionalData);
     try
     {
@@ -988,7 +987,7 @@ static void nmiDiagIntLog()
     }
     catch (const sdbusplus::exception_t& e)
     {
-        lg2::info("Failed to create log entry: {ERROR}", "ERROR", e.what());
+        lg2::error("Failed to create log entry: {ERROR}", "ERROR", e.what());
     }
 }
 
