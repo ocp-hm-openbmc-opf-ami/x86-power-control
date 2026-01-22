@@ -40,8 +40,6 @@
 #include <regex>
 #include <string_view>
 
-static std::shared_ptr<sdbusplus::asio::dbus_interface> taskIface;
-
 namespace power_control
 {
 static boost::asio::io_context io;
@@ -62,9 +60,6 @@ uint64_t prop = 0;
 bool timerStarted_system = false;
 bool timerStarted = false;
 bool timerStarted_chassis = false;
-
-std::vector<uint16_t> defaultId;
-std::string taskName;
 
 std::atomic<bool> chassis_timer(false);
 std::atomic<bool> host_timer(false);
@@ -2992,26 +2987,6 @@ bool bmcBootCheck()
 
 } // namespace power_control
 
-/*void createInterface(sdbusplus::asio::object_server& objectServer,
-                     std::string objectPath)
-{
-    uint16_t defaultId = 0;
-    std::string TaskName;
-    std::string defaultStatus =
-        "xyz.openbmc_project.Common.Task.OperationStatus.Completed";
-    taskIface = objectServer.add_interface(objectPath.c_str(),
-                                           "xyz.openbmc_project.Common.Task");
-    taskIface->register_property(
-        "Status", defaultStatus,
-        sdbusplus::asio::PropertyPermission::readWrite);
-    taskIface->register_property(
-        "TaskId", defaultId, sdbusplus::asio::PropertyPermission::readWrite);
-    taskIface->register_property(
-        "TaskName", TaskName, sdbusplus::asio::PropertyPermission::readWrite);
-    taskIface->initialize();
-}
-*/
-
 int main(int argc, char* argv[])
 {
     using namespace power_control;
@@ -3457,8 +3432,6 @@ int main(int argc, char* argv[])
         hostServer.add_interface("/xyz/openbmc_project/state/host" + node,
                                  "xyz.openbmc_project.State.Host");
 
-    // createInterface(hostServer, "/xyz/openbmc_project/state/host" + node);
-
     // Interface for IPMI/Redfish initiated host state transitions
     hostIface->register_property(
         "RequestedHostTransition",
@@ -3707,8 +3680,6 @@ int main(int argc, char* argv[])
     chassisIface =
         chassisServer.add_interface("/xyz/openbmc_project/state/chassis" + node,
                                     "xyz.openbmc_project.State.Chassis");
-    // createInterface(chassisServer, "/xyz/openbmc_project/state/chassis" +
-    // node);
 
     chassisIface->register_property(
         "RequestedPowerTransition",
@@ -4301,54 +4272,6 @@ int main(int argc, char* argv[])
         });
 
     osIface->initialize();
-
-    // Task State Service
-    sdbusplus::asio::object_server taskServer =
-        sdbusplus::asio::object_server(conn);
-
-    // OS State Interface
-    taskIface = taskServer.add_interface("/xyz/openbmc_project/state/host0",
-                                         "xyz.openbmc_project.Common.Task");
-
-    taskIface->register_property(
-        "Status",
-        std::string(
-            "xyz.openbmc_project.Common.Task.OperationStatus.Completed"),
-        [](const std::string& requested, std::string& resp) {
-            if ((requested ==
-                 "xyz.openbmc_project.Common.Task.OperationStatus.Cancelled") &&
-                (chassisTimeOut != 0))
-            {
-                chassisTransitionTimer.cancel();
-                chassis_timer = true;
-            }
-
-            if ((requested ==
-                 "xyz.openbmc_project.Common.Task.OperationStatus.Cancelled") &&
-                (powerTimeOut != 0))
-            {
-                powerTransitionTimer.cancel();
-                power_timer = true;
-            }
-
-            if ((requested ==
-                 "xyz.openbmc_project.Common.Task.OperationStatus.Cancelled") &&
-                (hostTimeOut != 0))
-            {
-                hostTransitionTimer.cancel();
-                host_timer = true;
-            }
-
-            resp = requested;
-            return 1;
-        });
-
-    taskIface->register_property(
-        "TaskId", defaultId, sdbusplus::asio::PropertyPermission::readWrite);
-    taskIface->register_property(
-        "TaskName", taskName, sdbusplus::asio::PropertyPermission::readWrite);
-
-    taskIface->initialize();
 
     // Restart Cause Service
     sdbusplus::asio::object_server restartCauseServer =
