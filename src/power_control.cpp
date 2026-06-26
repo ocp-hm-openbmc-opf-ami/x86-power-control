@@ -3411,6 +3411,7 @@ int main(int argc, char* argv[])
                             timerStarted_system = false;
                             return;
                         }
+                        return;
                     }
                     osIface->set_property("HostTransitionTimeOut", prop);
                     timerStarted_system = false;
@@ -3661,6 +3662,7 @@ int main(int argc, char* argv[])
                                 timerStarted = false;
                                 return;
                             }
+                            return;
                         }
                         osIface->set_property("PowerTransitionTimeOut", prop);
                         timerStarted = false;
@@ -3739,6 +3741,7 @@ int main(int argc, char* argv[])
                                 timerStarted_chassis = false;
                                 return;
                             }
+                            return;
                         }
                         osIface->set_property("ChassisHostTransitionTimeOut",
                                               prop);
@@ -4205,6 +4208,14 @@ int main(int argc, char* argv[])
              [](const uint64_t& requested, uint64_t& propertyValue) {
                  propertyValue = requested;
                  chassisTimeOut = propertyValue;
+
+                 if (chassisTimeOut < 1)
+                 {
+                     chassisTransitionTimer.cancel();
+                     powerTransitionTimer.cancel();
+                     hostTransitionTimer.cancel();
+                     propertyValue = 0;
+                 }
                  return true;
              });
 
@@ -4213,6 +4224,14 @@ int main(int argc, char* argv[])
              [](const uint64_t& requested, uint64_t& propertyValue) {
                  propertyValue = requested;
                  powerTimeOut = propertyValue;
+
+                 if (powerTimeOut < 1)
+                 {
+                     powerTransitionTimer.cancel();
+                     chassisTransitionTimer.cancel();
+                     hostTransitionTimer.cancel();
+                     propertyValue = 0;
+                 }
                  return true;
              });
 
@@ -4221,6 +4240,14 @@ int main(int argc, char* argv[])
              [](const uint64_t& requested, uint64_t& propertyValue) {
                  propertyValue = requested;
                  hostTimeOut = propertyValue;
+
+                 if (hostTimeOut < 1)
+                 {
+                     hostTransitionTimer.cancel();
+                     powerTransitionTimer.cancel();
+                     chassisTransitionTimer.cancel();
+                     propertyValue = 0;
+                 }
                  return true;
              });
 
