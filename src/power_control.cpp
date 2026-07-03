@@ -4214,6 +4214,9 @@ int main(int argc, char* argv[])
                      chassisTransitionTimer.cancel();
                      powerTransitionTimer.cancel();
                      hostTransitionTimer.cancel();
+                     timerStarted_chassis = false;
+                     timerStarted = false;
+                     timerStarted_system = false;
                      propertyValue = 0;
                  }
                  return true;
@@ -4230,6 +4233,9 @@ int main(int argc, char* argv[])
                      powerTransitionTimer.cancel();
                      chassisTransitionTimer.cancel();
                      hostTransitionTimer.cancel();
+                     timerStarted_chassis = false;
+                     timerStarted = false;
+                     timerStarted_system = false;
                      propertyValue = 0;
                  }
                  return true;
@@ -4246,6 +4252,9 @@ int main(int argc, char* argv[])
                      hostTransitionTimer.cancel();
                      powerTransitionTimer.cancel();
                      chassisTransitionTimer.cancel();
+                     timerStarted_chassis = false;
+                     timerStarted = false;
+                     timerStarted_system = false;
                      propertyValue = 0;
                  }
                  return true;
