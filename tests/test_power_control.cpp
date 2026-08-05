@@ -8,12 +8,13 @@
 #undef ERROR
 #endif
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-
 #include <boost/asio/io_context.hpp>
+
 #include <filesystem>
 #include <fstream>
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 static constexpr const char* kStateFile = "/var/lib/power-control/state.json";
 static constexpr const char* kPowerStateOn =
@@ -51,22 +52,21 @@ class PersistentStateTest : public ::testing::Test
 
 TEST_F(PersistentStateTest, Get_DefaultPowerStateIsOff)
 {
-    // Remove state file so a fresh instance must return the compiled-in default.
+    // Remove state file so a fresh instance must return the compiled-in
+    // default.
     std::filesystem::remove(kStateFile);
     power_control::PersistentState fresh;
-    EXPECT_EQ(
-        fresh.get(power_control::PersistentState::Params::PowerState),
-        kPowerStateOff);
+    EXPECT_EQ(fresh.get(power_control::PersistentState::Params::PowerState),
+              kPowerStateOff);
 }
 
 TEST_F(PersistentStateTest, GetSet_RoundTrip)
 {
     power_control::appState.set(
         power_control::PersistentState::Params::PowerState, kPowerStateOn);
-    EXPECT_EQ(
-        power_control::appState.get(
-            power_control::PersistentState::Params::PowerState),
-        kPowerStateOn);
+    EXPECT_EQ(power_control::appState.get(
+                  power_control::PersistentState::Params::PowerState),
+              kPowerStateOn);
 }
 
 TEST_F(PersistentStateTest, Set_PersistsAcrossInstances)
@@ -75,9 +75,8 @@ TEST_F(PersistentStateTest, Set_PersistsAcrossInstances)
         power_control::PersistentState::Params::PowerState, kPowerStateOn);
 
     power_control::PersistentState second;
-    EXPECT_EQ(
-        second.get(power_control::PersistentState::Params::PowerState),
-        kPowerStateOn);
+    EXPECT_EQ(second.get(power_control::PersistentState::Params::PowerState),
+              kPowerStateOn);
 }
 
 TEST_F(PersistentStateTest, Get_ReturnsUpdatedValueAfterReset)
@@ -86,10 +85,9 @@ TEST_F(PersistentStateTest, Get_ReturnsUpdatedValueAfterReset)
         power_control::PersistentState::Params::PowerState, kPowerStateOn);
     power_control::appState.set(
         power_control::PersistentState::Params::PowerState, kPowerStateOff);
-    EXPECT_EQ(
-        power_control::appState.get(
-            power_control::PersistentState::Params::PowerState),
-        kPowerStateOff);
+    EXPECT_EQ(power_control::appState.get(
+                  power_control::PersistentState::Params::PowerState),
+              kPowerStateOff);
 }
 
 TEST_F(PersistentStateTest, Constructor_HandlesCorruptStateFile)
@@ -111,9 +109,8 @@ TEST_F(PersistentStateTest, Constructor_HandlesNonexistentStateFile)
     std::filesystem::remove(kStateFile);
     EXPECT_NO_THROW({
         power_control::PersistentState fresh;
-        EXPECT_EQ(
-            fresh.get(power_control::PersistentState::Params::PowerState),
-            kPowerStateOff);
+        EXPECT_EQ(fresh.get(power_control::PersistentState::Params::PowerState),
+                  kPowerStateOff);
     });
 }
 
