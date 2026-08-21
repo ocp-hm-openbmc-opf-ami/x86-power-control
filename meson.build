@@ -36,6 +36,15 @@ if get_option('button-passthrough').allowed()
     cpp_args += '-DUSE_BUTTON_PASSTHROUGH'
 endif
 
+if get_option('tests').enabled()
+    add_project_arguments('-DUNIT_TESTING', '-Wno-parentheses', language: 'cpp')
+    sdbusplus = subproject('sdbusplus').get_variable('sdbusplus_dep')
+    meson.override_dependency('sdbusplus', sdbusplus)
+    phosphor_dbus_interfaces_dep = subproject('phosphor-dbus-interfaces').get_variable('phosphor_dbus_interfaces_dep')
+    phosphor_logging_dep = subproject('phosphor-logging').get_variable('phosphor_logging_dep')
+    meson.override_dependency('phosphor-logging', phosphor_logging_dep)
+endif
+
 deps = [
     dependency('libgpiodcxx', default_options: ['bindings=cxx']),
     dependency('libsystemd'),
@@ -45,7 +54,11 @@ deps = [
     dependency('boost'),
 ]
 
-pdkhook_deps = [ declare_dependency (link_args: '-lpdkhook'),]
+if get_option('tests').enabled()
+    pdkhook_deps = [dependency('libpdkhook', fallback: ['libpdkhook', 'libpdkhook_dep'])]
+else
+    pdkhook_deps = [declare_dependency(link_args: '-lpdkhook')]
+endif
 
 executable(
     'power-control',
@@ -71,3 +84,7 @@ install_data(
     'config/power-config-host0.json',
     install_dir: '/usr/share/x86-power-control/',
 )
+
+if get_option('tests').enabled()
+    subdir('tests')
+endif
