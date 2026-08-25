@@ -28,3 +28,8 @@ option(
     value: 'disabled',
     description: 'Directly couple through power and reset buttons',
 )
+
+option('tests', 
+	type: 'feature', 
+	description: 'Enables Unit tests',
+)
